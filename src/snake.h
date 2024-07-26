@@ -24,3 +24,14 @@ typedef struct {
     int y;
     CellState type;
 } Cell;
+
+typedef struct SnakeCell {
+    int x;
+    int y;
+    Direction direction;
+    struct SnakeCell *next;
+} SnakeCell;
+
+typedef struct {
+    SnakeCell *head;
+} Snake;

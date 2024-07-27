@@ -9,6 +9,8 @@ static void init_board(void);
 static void draw_board(void);
 static void init_snake(void);
 static void update_snake(void);
+static void update_direction(void);
+static void game_over(void);
 
 /* The game board which controls the grid, indexes are in (x, y) format */
 Cell board[COLS][ROWS];
@@ -22,14 +24,23 @@ int main(void) {
 
     init_board();
     init_snake();
-    printf("Snake %d, %d", snake->head->x, snake->head->y);
 
+    double last_time = GetTime();
     while (!WindowShouldClose()) {
         BeginDrawing();
-            draw_background();
-            draw_board();
+        /* Draw screen and snake at 10 FPS */
+        draw_background();
+        draw_board();
+        update_direction();
+        
+        /* Update snake's position at 10 FPS */
+        if((GetTime() - last_time) > 0.1) {
+            update_snake();
+            last_time = GetTime();
+        }  
+        
         EndDrawing();
-        update_snake();
+        
     }
 
     CloseWindow();
@@ -55,6 +66,9 @@ static void draw_board() {
             Cell c = board[x][y];
             if (c.type == SNAKE_HEAD) {
                 DrawRectangle(c.x * CELL_WIDTH, c.y * CELL_WIDTH, CELL_WIDTH, CELL_WIDTH, DARKGREEN);
+            } 
+            else if (c.type == SNAKE_BODY) {
+                DrawRectangle(c.x * CELL_WIDTH, c.y * CELL_WIDTH, CELL_WIDTH, CELL_WIDTH, GREEN);
             }
             else {
                 DrawRectangleLines(c.x * CELL_WIDTH, c.y * CELL_WIDTH, CELL_WIDTH, CELL_WIDTH, LIGHTGRAY);
@@ -72,15 +86,18 @@ static void init_snake(void) {
     board[0][0].type = SNAKE_HEAD;
 }
 
-static void update_snake(void) {
-    SnakeCell *cell = snake->head;
+static void update_direction(void) {
+    SnakeCell *head = snake->head;
 
     /* Update direction */
-    if (IsKeyDown(KEY_RIGHT)) cell->direction = RIGHT;
-    if (IsKeyDown(KEY_LEFT)) cell->direction = LEFT;
-    if (IsKeyDown(KEY_UP)) cell->direction = UP;
-    if (IsKeyDown(KEY_DOWN)) cell->direction = DOWN;
+    if (IsKeyDown(KEY_RIGHT)) head->direction = RIGHT;
+    if (IsKeyDown(KEY_LEFT)) head->direction = LEFT;
+    if (IsKeyDown(KEY_UP)) head->direction = UP;
+    if (IsKeyDown(KEY_DOWN)) head->direction = DOWN;
+}
 
+static void update_snake(void) {
+    SnakeCell *cell = snake->head;
 
     int x, y;
     while (cell) {
@@ -95,12 +112,20 @@ static void update_snake(void) {
         } else {
             cell->y -= 1;
         }
+
+        /* Check that snake didn't hit the edge of the board */
+        if (cell->x < 0 || cell->x >= COLS || cell->y < 0 || cell->y >= ROWS) {
+            game_over();
+        }
         board[cell->x][cell->y].type = SNAKE_HEAD; /* Update board of snake's location*/
         cell = cell->next;
     }
     board[x][y].type = EMPTY; /* */
 }
 
+static void game_over(void) {
+    CloseWindow();
+}
 
 
 

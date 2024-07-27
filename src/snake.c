@@ -19,6 +19,7 @@ Cell board[COLS][ROWS];
 Snake *snake;
 
 int main(void) {
+    SetTraceLogLevel(LOG_ERROR); 
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Snake");
     SetTargetFPS(FPS);
 
@@ -99,7 +100,24 @@ static void update_direction(void) {
 static void update_snake(void) {
     SnakeCell *cell = snake->head;
 
-    int x, y;
+    int x = cell->x, y = cell->y;
+
+    if (cell->direction == RIGHT) {
+        cell->x += 1;
+    } else if (cell->direction == LEFT) {
+        cell->x -= 1;
+    } else if (cell->direction == DOWN) {
+        cell->y += 1;
+    } else {
+        cell->y -= 1;
+    }
+
+    /* Check that snake didn't hit the edge of the board */
+    if (cell->x < 0 || cell->x >= COLS || cell->y < 0 || cell->y >= ROWS) {
+        game_over();
+    }
+    board[cell->x][cell->y].type = SNAKE_HEAD; /* Update board of snake's location*/
+    cell = cell->next;
     while (cell) {
         x = cell->x;
         y = cell->y;
@@ -113,18 +131,15 @@ static void update_snake(void) {
             cell->y -= 1;
         }
 
-        /* Check that snake didn't hit the edge of the board */
-        if (cell->x < 0 || cell->x >= COLS || cell->y < 0 || cell->y >= ROWS) {
-            game_over();
-        }
-        board[cell->x][cell->y].type = SNAKE_HEAD; /* Update board of snake's location*/
+        board[cell->x][cell->y].type = SNAKE_BODY; /* Update board of snake's location*/
         cell = cell->next;
     }
-    board[x][y].type = EMPTY; /* */
+    board[x][y].type = EMPTY;
 }
 
 static void game_over(void) {
     CloseWindow();
+    exit(EXIT_SUCCESS);
 }
 
 

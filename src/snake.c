@@ -75,12 +75,17 @@ static void init_snake(void) {
 static void update_snake(void) {
     SnakeCell *cell = snake->head;
 
-    int x, y;
+    /* Update direction */
+    if (IsKeyDown(KEY_RIGHT)) cell->direction = RIGHT;
+    if (IsKeyDown(KEY_LEFT)) cell->direction = LEFT;
+    if (IsKeyDown(KEY_UP)) cell->direction = UP;
+    if (IsKeyDown(KEY_DOWN)) cell->direction = DOWN;
 
+
+    int x, y;
     while (cell) {
         x = cell->x;
         y = cell->y;
-
         if (cell->direction == RIGHT) {
             cell->x += 1;
         } else if (cell->direction == LEFT) {

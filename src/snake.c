@@ -11,6 +11,7 @@ static void init_snake(void);
 static void update_snake(void);
 static void update_direction(void);
 static void game_over(void);
+static void draw_apple(void);
 
 /* The game board which controls the grid, indexes are in (x, y) format */
 Cell board[COLS][ROWS];
@@ -18,6 +19,11 @@ Cell board[COLS][ROWS];
 /* Snake */
 Snake *snake;
 
+int apple_exists = 0;
+
+/*
+TODO: draw apples on board and grow snake
+*/
 int main(void) {
     SetTraceLogLevel(LOG_ERROR); 
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Snake");
@@ -28,20 +34,24 @@ int main(void) {
 
     double last_time = GetTime();
     while (!WindowShouldClose()) {
+        if (!apple_exists) {
+            draw_apple();
+        }
+
         BeginDrawing();
-        /* Draw screen and snake at 10 FPS */
+
         draw_background();
         draw_board();
         update_direction();
         
+        
+        EndDrawing();
+
         /* Update snake's position at 10 FPS */
         if((GetTime() - last_time) > 0.1) {
             update_snake();
             last_time = GetTime();
         }  
-        
-        EndDrawing();
-        
     }
 
     CloseWindow();
@@ -70,6 +80,9 @@ static void draw_board() {
             } 
             else if (c.type == SNAKE_BODY) {
                 DrawRectangle(c.x * CELL_WIDTH, c.y * CELL_WIDTH, CELL_WIDTH, CELL_WIDTH, GREEN);
+            }
+            else if (c.type == APPLE) {
+                DrawRectangle(c.x * CELL_WIDTH, c.y * CELL_WIDTH, CELL_WIDTH, CELL_WIDTH, RED);
             }
             else {
                 DrawRectangleLines(c.x * CELL_WIDTH, c.y * CELL_WIDTH, CELL_WIDTH, CELL_WIDTH, LIGHTGRAY);
@@ -140,6 +153,18 @@ static void update_snake(void) {
 static void game_over(void) {
     CloseWindow();
     exit(EXIT_SUCCESS);
+}
+
+static void draw_apple(void) {
+    /* Get a random cell in board that is not occupied by the snake */
+    int rand_x, rand_y;
+    do {
+        rand_x = rand() % COLS;
+        rand_y = rand() % ROWS;
+    } while (board[rand_x][rand_y].type != EMPTY);
+
+    board[rand_x][rand_y].type = APPLE;
+    apple_exists = 1;
 }
 
 

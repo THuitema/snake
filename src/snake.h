@@ -4,7 +4,7 @@
 #define COLS 25 
 #define CELL_WIDTH WINDOW_WIDTH / COLS
 #define FPS 60
-#define POSITION_FPS 5
+#define POSITION_FPS 12
 
 typedef enum {
     UP,

@@ -73,18 +73,20 @@ static void draw_board() {
     for (int x = 0; x < COLS; x++) {
         for (int y = 0; y < ROWS; y++) {
             Cell c = board[x][y];
-            if (c.type == SNAKE_HEAD) {
-                DrawRectangle(c.x * CELL_WIDTH, c.y * CELL_WIDTH, CELL_WIDTH, CELL_WIDTH, GREEN);
-            } 
-            else if (c.type == SNAKE_BODY) {
-                DrawRectangle(c.x * CELL_WIDTH, c.y * CELL_WIDTH, CELL_WIDTH, CELL_WIDTH,  DARKGREEN);
+            Color color;
+            
+            if (c.type == SNAKE_BODY || c.type == SNAKE_HEAD) {
+                color = GREEN;
             }
             else if (c.type == APPLE) {
-                DrawRectangle(c.x * CELL_WIDTH, c.y * CELL_WIDTH, CELL_WIDTH, CELL_WIDTH, RED);
+                color = RED;
             }
             else {
-                DrawRectangle(c.x * CELL_WIDTH, c.y * CELL_WIDTH, CELL_WIDTH, CELL_WIDTH, BLACK);
+                color = BLACK;
             }
+
+            DrawRectangle(c.x * CELL_WIDTH, c.y * CELL_WIDTH, CELL_WIDTH, CELL_WIDTH, BLACK);
+            DrawRectangle(c.x * CELL_WIDTH + 1, c.y * CELL_WIDTH - 1, CELL_WIDTH - 2, CELL_WIDTH - 2, color);
         }
     }
 }

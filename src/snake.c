@@ -3,6 +3,7 @@
 #include "snake.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 
 static void draw_background(void);
 static void init_board(void);
@@ -12,6 +13,11 @@ static void update_snake(void);
 static void update_direction(void);
 static void game_over(void);
 static void draw_apple(void);
+static void increase_snake(void);
+
+static const char *DIRECTIONS[] = {
+    "UP", "DOWN", "LEFT", "RIGHT",
+};
 
 /* The game board which controls the grid, indexes are in (x, y) format */
 Cell board[COLS][ROWS];
@@ -21,13 +27,11 @@ Snake *snake;
 
 int apple_exists = 0;
 
-/*
-TODO: draw apples on board and grow snake
-*/
 int main(void) {
     SetTraceLogLevel(LOG_ERROR); 
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Snake");
     SetTargetFPS(FPS);
+    srand(time(NULL));
 
     init_board();
     init_snake();
@@ -39,16 +43,14 @@ int main(void) {
         }
 
         BeginDrawing();
-
         draw_background();
         draw_board();
-        update_direction();
-        
-        
         EndDrawing();
 
+        update_direction();
+
         /* Update snake's position at 10 FPS */
-        if((GetTime() - last_time) > 0.1) {
+        if((GetTime() - last_time) > (1.0 / POSITION_FPS)) {
             update_snake();
             last_time = GetTime();
         }  
@@ -94,6 +96,7 @@ static void draw_board() {
 static void init_snake(void) {
     snake = malloc(sizeof(Snake));
     snake->head = malloc(sizeof(SnakeCell));
+    snake->tail = snake->head;
     snake->head->x = 0;
     snake->head->y = 0;
     snake->head->direction = RIGHT;
@@ -114,6 +117,7 @@ static void update_snake(void) {
     SnakeCell *cell = snake->head;
 
     int x = cell->x, y = cell->y;
+    Direction parent_direction = cell->direction;
 
     if (cell->direction == RIGHT) {
         cell->x += 1;
@@ -125,11 +129,18 @@ static void update_snake(void) {
         cell->y -= 1;
     }
 
-    /* Check that snake didn't hit the edge of the board */
+    /* Check if snake hit the edge of the board */
     if (cell->x < 0 || cell->x >= COLS || cell->y < 0 || cell->y >= ROWS) {
         game_over();
     }
-    board[cell->x][cell->y].type = SNAKE_HEAD; /* Update board of snake's location*/
+
+    /* Check if snake ate an apple */
+    if (board[cell->x][cell->y].type == APPLE) {
+        increase_snake();
+        apple_exists = 0;
+    }
+
+    board[cell->x][cell->y].type = SNAKE_HEAD; /* Update board of snake's location */
     cell = cell->next;
     while (cell) {
         x = cell->x;
@@ -144,9 +155,16 @@ static void update_snake(void) {
             cell->y -= 1;
         }
 
+        /* Change direction of snake body */
+        Direction curr_direction = cell->direction;
+        cell->direction = parent_direction;
+        parent_direction = curr_direction;
+        
+
         board[cell->x][cell->y].type = SNAKE_BODY; /* Update board of snake's location*/
         cell = cell->next;
     }
+
     board[x][y].type = EMPTY;
 }
 
@@ -165,6 +183,34 @@ static void draw_apple(void) {
 
     board[rand_x][rand_y].type = APPLE;
     apple_exists = 1;
+}
+
+static void increase_snake(void) {
+    SnakeCell *new_tail = malloc(sizeof(SnakeCell));
+    new_tail->x = snake->tail->x;
+    new_tail->y = snake->tail->y;
+
+    int offset = 1;
+    if (snake->head == snake->tail) {
+        offset = 2;
+    }
+
+    if (snake->tail->direction == RIGHT) {
+        new_tail->direction = RIGHT;
+        new_tail->x -= offset;
+    } else if (snake->tail->direction == LEFT) {
+        new_tail->direction = LEFT;
+        new_tail->x += offset;
+    } else if (snake->tail->direction == DOWN) {
+        new_tail->direction = DOWN;
+        new_tail->y -= offset;
+    } else {
+        new_tail->direction = UP;
+        new_tail->y += offset;
+    }
+
+    snake->tail->next = new_tail;
+    snake->tail = new_tail;    
 }
 
 

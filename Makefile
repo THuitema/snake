@@ -1,7 +1,7 @@
 COMPILER = clang
 SOURCE_LIBS = -I lib/
 OSX_OPT = -L lib/ -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL lib/libraylib.a
-OSX_OUT = -o "bin/build_osx"
+OSX_OUT = -o snake
 CFILES = src/*.c
 
 build_osx:

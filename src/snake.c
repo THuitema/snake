@@ -15,14 +15,10 @@ static void game_over(void);
 static void draw_apple(void);
 static void increase_snake(void);
 
-static const char *DIRECTIONS[] = {
-    "UP", "DOWN", "LEFT", "RIGHT",
-};
 
 /* The game board which controls the grid, indexes are in (x, y) format */
 Cell board[COLS][ROWS];
 
-/* Snake */
 Snake *snake;
 
 int apple_exists = 0;
@@ -107,10 +103,18 @@ static void update_direction(void) {
     SnakeCell *head = snake->head;
 
     /* Update direction */
-    if (IsKeyDown(KEY_RIGHT)) head->direction = RIGHT;
-    if (IsKeyDown(KEY_LEFT)) head->direction = LEFT;
-    if (IsKeyDown(KEY_UP)) head->direction = UP;
-    if (IsKeyDown(KEY_DOWN)) head->direction = DOWN;
+    if (IsKeyDown(KEY_RIGHT) && head->direction != LEFT) {
+        head->direction = RIGHT;
+    }
+    if (IsKeyDown(KEY_LEFT) && head->direction != RIGHT) {
+        head->direction = LEFT;
+    }
+    if (IsKeyDown(KEY_UP) && head->direction != DOWN) {
+        head->direction = UP;
+    }
+    if (IsKeyDown(KEY_DOWN) && head->direction != UP) {
+        head->direction = DOWN;
+    }
 }
 
 static void update_snake(void) {
@@ -131,6 +135,11 @@ static void update_snake(void) {
 
     /* Check if snake hit the edge of the board */
     if (cell->x < 0 || cell->x >= COLS || cell->y < 0 || cell->y >= ROWS) {
+        game_over();
+    }
+
+    /* Check if snake collided with itself */
+    if (board[cell->x][cell->y].type == SNAKE_BODY) {
         game_over();
     }
 

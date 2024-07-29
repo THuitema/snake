@@ -1,10 +1,12 @@
 #define WINDOW_WIDTH 1000
 #define WINDOW_HEIGHT 600
+#define HEADER_HEIGHT 50
 #define ROWS 15 
 #define COLS 25 
 #define CELL_WIDTH WINDOW_WIDTH / COLS
 #define FPS 60
 #define POSITION_FPS 12
+#define SCORE_FONT_SIZE 20
 
 typedef enum {
     UP,
@@ -36,4 +38,5 @@ typedef struct SnakeCell {
 typedef struct {
     SnakeCell *head;
     SnakeCell *tail;
+    int length;
 } Snake;

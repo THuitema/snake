@@ -6,6 +6,7 @@
 #include <time.h>
 
 static void draw_background(void);
+static void draw_header(void);
 static void init_board(void);
 static void draw_board(void);
 static void init_snake(void);
@@ -25,7 +26,7 @@ int apple_exists = 0;
 
 int main(void) {
     SetTraceLogLevel(LOG_ERROR); 
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Snake");
+    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT + HEADER_HEIGHT, "Snake");
     SetTargetFPS(FPS);
     srand(time(NULL));
 
@@ -41,6 +42,7 @@ int main(void) {
         BeginDrawing();
         draw_background();
         draw_board();
+        draw_header();
         EndDrawing();
 
         update_direction();
@@ -58,35 +60,21 @@ int main(void) {
 }
 
 static void draw_background(void) {
-    ClearBackground(WHITE);
+    ClearBackground(BLACK);
+}
+
+static void draw_header(void) {
+    DrawLine(0, HEADER_HEIGHT, WINDOW_WIDTH, HEADER_HEIGHT, RAYWHITE);
+
+    char score[10];
+    sprintf(score, "Score: %d", snake->length);
+    DrawText(score, 5, 15, SCORE_FONT_SIZE, RAYWHITE);
 }
 
 static void init_board(void) {
     for (int x = 0; x < COLS; x++) {
         for (int y = 0; y < ROWS; y++) {
             board[x][y] = (Cell) {.x = x, .y = y, .type = EMPTY};
-        }
-    }
-}
-
-static void draw_board() {
-    for (int x = 0; x < COLS; x++) {
-        for (int y = 0; y < ROWS; y++) {
-            Cell c = board[x][y];
-            Color color;
-            
-            if (c.type == SNAKE_BODY || c.type == SNAKE_HEAD) {
-                color = GREEN;
-            }
-            else if (c.type == APPLE) {
-                color = RED;
-            }
-            else {
-                color = BLACK;
-            }
-
-            DrawRectangle(c.x * CELL_WIDTH, c.y * CELL_WIDTH, CELL_WIDTH, CELL_WIDTH, BLACK);
-            DrawRectangle(c.x * CELL_WIDTH + 1, c.y * CELL_WIDTH - 1, CELL_WIDTH - 2, CELL_WIDTH - 2, color);
         }
     }
 }
@@ -98,7 +86,30 @@ static void init_snake(void) {
     snake->head->x = 0;
     snake->head->y = 0;
     snake->head->direction = RIGHT;
+    snake->length = 1;
     board[0][0].type = SNAKE_HEAD;
+}
+
+static void draw_board() {
+    for (int x = 0; x < COLS; x++) {
+        for (int y = 0; y < ROWS; y++) {
+            Cell c = board[x][y];
+            Color color;
+
+            if (c.type == SNAKE_BODY || c.type == SNAKE_HEAD) {
+                color = GREEN;
+            }
+            else if (c.type == APPLE) {
+                color = RED;
+            }
+            else {
+                color = BLACK;
+            }
+
+            DrawRectangle(c.x * CELL_WIDTH, c.y * CELL_WIDTH + HEADER_HEIGHT, CELL_WIDTH, CELL_WIDTH, BLACK);
+            DrawRectangle(c.x * CELL_WIDTH + 1, c.y * CELL_WIDTH - 1 + HEADER_HEIGHT, CELL_WIDTH - 2, CELL_WIDTH - 2, color);
+        }
+    }
 }
 
 static void update_direction(void) {
@@ -222,6 +233,7 @@ static void increase_snake(void) {
 
     snake->tail->next = new_tail;
     snake->tail = new_tail;    
+    snake->length++;
 }
 
 

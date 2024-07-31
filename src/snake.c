@@ -15,6 +15,15 @@ static void update_direction(void);
 static void game_over(void);
 static void draw_apple(void);
 static void increase_snake(void);
+static void draw_start_screen(void);
+
+/*
+TODO:
+• Documentation
+• Add start and gameover screens (so program doesn't just close when game ends)
+• Track high score over the current run of the program
+• Change "difficulty" i.e. changing the POSITION_FPS variable
+*/
 
 
 /* The game board which controls the grid, indexes are in (x, y) format */
@@ -23,6 +32,9 @@ Cell board[COLS][ROWS];
 Snake *snake;
 
 int apple_exists = 0;
+int high_score = 0;
+
+GameScreen screen = START;
 
 int main(void) {
     SetTraceLogLevel(LOG_ERROR); 
@@ -35,23 +47,41 @@ int main(void) {
 
     double last_time = GetTime();
     while (!WindowShouldClose()) {
-        if (!apple_exists) {
-            draw_apple();
-        }
-
         BeginDrawing();
         draw_background();
-        draw_board();
+        
+
+        if (screen == START) {
+            draw_start_screen();
+            if (IsKeyPressed(KEY_ENTER)) {
+                screen = GAME;
+            }
+        }
+        if (screen == GAME) {
+            if (!apple_exists) {
+                draw_apple();
+            }
+
+            // BeginDrawing();
+            // draw_background();
+            draw_board();
+            // draw_header();
+            
+
+            update_direction();
+
+            /* Update snake's position at 10 FPS */
+            if((GetTime() - last_time) > (1.0 / POSITION_FPS)) {
+                update_snake();
+                last_time = GetTime();
+            }  
+        }
+        if (screen == GAMEOVER) {
+            exit(EXIT_SUCCESS);
+        }
         draw_header();
         EndDrawing();
-
-        update_direction();
-
-        /* Update snake's position at 10 FPS */
-        if((GetTime() - last_time) > (1.0 / POSITION_FPS)) {
-            update_snake();
-            last_time = GetTime();
-        }  
+        
     }
 
     CloseWindow();
@@ -66,9 +96,13 @@ static void draw_background(void) {
 static void draw_header(void) {
     DrawLine(0, HEADER_HEIGHT, WINDOW_WIDTH, HEADER_HEIGHT, RAYWHITE);
 
-    char score[10];
+    char score[20];
     sprintf(score, "Score: %d", snake->length);
     DrawText(score, 5, 15, SCORE_FONT_SIZE, RAYWHITE);
+
+    char high_score_str[20];
+    sprintf(high_score_str, "High Score: %d", high_score);
+    DrawText(high_score_str, WINDOW_WIDTH - 175, 15, SCORE_FONT_SIZE, RAYWHITE);
 }
 
 static void init_board(void) {
@@ -191,8 +225,12 @@ static void update_snake(void) {
 }
 
 static void game_over(void) {
-    CloseWindow();
-    exit(EXIT_SUCCESS);
+    if (snake->length > high_score) {
+        high_score = snake->length;
+    }
+    screen = GAMEOVER;
+    // CloseWindow();
+    // exit(EXIT_SUCCESS);
 }
 
 static void draw_apple(void) {
@@ -236,6 +274,10 @@ static void increase_snake(void) {
     snake->length++;
 }
 
+static void draw_start_screen(void) {
+    DrawText("SNAKE", (WINDOW_WIDTH / 2) - 100, (WINDOW_HEIGHT / 2) - 150, 70, GREEN);
+    DrawText("Press [Enter] to play", (WINDOW_WIDTH / 2) - 150, (WINDOW_HEIGHT / 2) - 50, 30, RAYWHITE);
 
+}
 
 

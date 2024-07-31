@@ -96,9 +96,14 @@ static void draw_background(void) {
 static void draw_header(void) {
     DrawLine(0, HEADER_HEIGHT, WINDOW_WIDTH, HEADER_HEIGHT, RAYWHITE);
 
+    /* Only draw the score if the game is being played */
     char score[20];
-    sprintf(score, "Score: %d", snake->length);
-    DrawText(score, 5, 15, SCORE_FONT_SIZE, RAYWHITE);
+    if (screen == GAME) {
+        sprintf(score, "Score: %d", snake->length);
+    } else {
+        sprintf(score, "Score: 0");
+    }
+    DrawText(score, 15, 15, SCORE_FONT_SIZE, RAYWHITE);
 
     char high_score_str[20];
     sprintf(high_score_str, "High Score: %d", high_score);
@@ -275,8 +280,8 @@ static void increase_snake(void) {
 }
 
 static void draw_start_screen(void) {
-    DrawText("SNAKE", (WINDOW_WIDTH / 2) - 100, (WINDOW_HEIGHT / 2) - 150, 70, GREEN);
-    DrawText("Press [Enter] to play", (WINDOW_WIDTH / 2) - 150, (WINDOW_HEIGHT / 2) - 50, 30, RAYWHITE);
+    DrawText("SNAKE", (WINDOW_WIDTH / 2) - 115, (WINDOW_HEIGHT / 2) - 150, 70, GREEN);
+    DrawText("Press [Enter] to play", (WINDOW_WIDTH / 2) - 165, (WINDOW_HEIGHT / 2) - 50, 30, RAYWHITE);
 
 }
 

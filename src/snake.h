@@ -16,6 +16,12 @@ typedef enum {
 } Direction; 
 
 typedef enum {
+    START,
+    GAME,
+    GAMEOVER
+} GameScreen;
+
+typedef enum {
     SNAKE_HEAD,
     SNAKE_BODY,
     APPLE,

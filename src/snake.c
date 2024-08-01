@@ -16,12 +16,11 @@ static void game_over(void);
 static void draw_apple(void);
 static void increase_snake(void);
 static void draw_start_screen(void);
-
+static void draw_game_over_screen(void);
 /*
 TODO:
 • Documentation
-• Add start and gameover screens (so program doesn't just close when game ends)
-• Track high score over the current run of the program
+• Add gameover screen (similar to draw_start_screen(), text for "GAME OVER" and score, reset snake and board)
 • Change "difficulty" i.e. changing the POSITION_FPS variable
 */
 
@@ -51,12 +50,23 @@ int main(void) {
         draw_background();
         
 
+        /* Start screen */
         if (screen == START) {
             draw_start_screen();
             if (IsKeyPressed(KEY_ENTER)) {
                 screen = GAME;
             }
         }
+
+        /* Game over screen */
+        if (screen == GAMEOVER) {
+            draw_game_over_screen();
+            if (IsKeyPressed(KEY_ENTER)) {
+                screen = GAME;
+            }
+        }
+
+        /* Game screen */
         if (screen == GAME) {
             if (!apple_exists) {
                 draw_apple();
@@ -76,9 +86,9 @@ int main(void) {
                 last_time = GetTime();
             }  
         }
-        if (screen == GAMEOVER) {
-            exit(EXIT_SUCCESS);
-        }
+        // if (screen == GAMEOVER) {
+        //     exit(EXIT_SUCCESS);
+        // }
         draw_header();
         EndDrawing();
         
@@ -234,8 +244,6 @@ static void game_over(void) {
         high_score = snake->length;
     }
     screen = GAMEOVER;
-    // CloseWindow();
-    // exit(EXIT_SUCCESS);
 }
 
 static void draw_apple(void) {
@@ -282,7 +290,11 @@ static void increase_snake(void) {
 static void draw_start_screen(void) {
     DrawText("SNAKE", (WINDOW_WIDTH / 2) - 115, (WINDOW_HEIGHT / 2) - 150, 70, GREEN);
     DrawText("Press [Enter] to play", (WINDOW_WIDTH / 2) - 165, (WINDOW_HEIGHT / 2) - 50, 30, RAYWHITE);
+}
 
+static void draw_game_over_screen(void) {
+    DrawText("GAME OVER", (WINDOW_WIDTH / 2) - 215, (WINDOW_HEIGHT / 2) - 150, 70, GREEN);
+    DrawText("Press [Enter] to play", (WINDOW_WIDTH / 2) - 165, (WINDOW_HEIGHT / 2) - 50, 30, RAYWHITE);
 }
 
 

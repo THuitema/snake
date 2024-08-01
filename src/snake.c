@@ -17,6 +17,8 @@ static void draw_apple(void);
 static void increase_snake(void);
 static void draw_start_screen(void);
 static void draw_game_over_screen(void);
+static void reset_game(void);
+
 /*
 TODO:
 • Documentation
@@ -63,6 +65,7 @@ int main(void) {
             draw_game_over_screen();
             if (IsKeyPressed(KEY_ENTER)) {
                 screen = GAME;
+                reset_game();
             }
         }
 
@@ -111,7 +114,7 @@ static void draw_header(void) {
     if (screen == GAME) {
         sprintf(score, "Score: %d", snake->length);
     } else {
-        sprintf(score, "Score: 0");
+        sprintf(score, "Score:");
     }
     DrawText(score, 15, 15, SCORE_FONT_SIZE, RAYWHITE);
 
@@ -297,4 +300,25 @@ static void draw_game_over_screen(void) {
     DrawText("Press [Enter] to play", (WINDOW_WIDTH / 2) - 165, (WINDOW_HEIGHT / 2) - 50, 30, RAYWHITE);
 }
 
+static void reset_game(void) {
+    /* Clear all board cells */
+    for (int x = 0; x < COLS; x++) {
+        for (int y = 0; y < ROWS; y++) {
+            board[x][y].type = EMPTY;
+        }
+    }
 
+    /* Free snake memory */
+    SnakeCell *curr = snake->head;
+    SnakeCell *to_delete;
+
+    while (curr) {
+        to_delete = curr;
+        curr = curr->next;
+        free(to_delete);
+    }
+    free(snake);
+    init_snake();
+
+    apple_exists = 0;
+}

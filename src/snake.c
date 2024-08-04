@@ -19,15 +19,6 @@ static void draw_start_screen(void);
 static void draw_game_over_screen(void);
 static void reset_game(void);
 
-/*
-TODO:
-• Documentation
-• Add gameover screen (similar to draw_start_screen(), text for "GAME OVER" and score, reset snake and board)
-• Change "difficulty" i.e. changing the POSITION_FPS variable
-*/
-
-
-/* The game board which controls the grid, indexes are in (x, y) format */
 Cell board[COLS][ROWS];
 
 Snake *snake;
@@ -38,6 +29,7 @@ int high_score = 0;
 GameScreen screen = START;
 
 int main(void) {
+    /* Initial game settings and setup */
     SetTraceLogLevel(LOG_ERROR); 
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT + HEADER_HEIGHT, "Snake");
     SetTargetFPS(FPS);
@@ -47,11 +39,12 @@ int main(void) {
     init_snake();
 
     double last_time = GetTime();
+
+    /* Frame loop */
     while (!WindowShouldClose()) {
         BeginDrawing();
         draw_background();
         
-
         /* Start screen */
         if (screen == START) {
             draw_start_screen();
@@ -74,13 +67,7 @@ int main(void) {
             if (!apple_exists) {
                 draw_apple();
             }
-
-            // BeginDrawing();
-            // draw_background();
             draw_board();
-            // draw_header();
-            
-
             update_direction();
 
             /* Update snake's position at 10 FPS */
@@ -89,12 +76,8 @@ int main(void) {
                 last_time = GetTime();
             }  
         }
-        // if (screen == GAMEOVER) {
-        //     exit(EXIT_SUCCESS);
-        // }
         draw_header();
-        EndDrawing();
-        
+        EndDrawing();  
     }
 
     CloseWindow();
@@ -102,10 +85,12 @@ int main(void) {
     return 0;
 }
 
+
 static void draw_background(void) {
     ClearBackground(BLACK);
 }
 
+/* Draw panel at top of screen showing score and high score */
 static void draw_header(void) {
     DrawLine(0, HEADER_HEIGHT, WINDOW_WIDTH, HEADER_HEIGHT, RAYWHITE);
 
@@ -123,6 +108,7 @@ static void draw_header(void) {
     DrawText(high_score_str, WINDOW_WIDTH - 175, 15, SCORE_FONT_SIZE, RAYWHITE);
 }
 
+/* Initialize the board to all EMPTY cells */
 static void init_board(void) {
     for (int x = 0; x < COLS; x++) {
         for (int y = 0; y < ROWS; y++) {
@@ -131,6 +117,7 @@ static void init_board(void) {
     }
 }
 
+/* Initialize the snake by allocating memory and starting location */
 static void init_snake(void) {
     snake = malloc(sizeof(Snake));
     snake->head = malloc(sizeof(SnakeCell));
@@ -142,6 +129,7 @@ static void init_snake(void) {
     board[0][0].type = SNAKE_HEAD;
 }
 
+/* Draw snake and apple (if applicable) on board */
 static void draw_board() {
     for (int x = 0; x < COLS; x++) {
         for (int y = 0; y < ROWS; y++) {
@@ -164,6 +152,7 @@ static void draw_board() {
     }
 }
 
+/* Check for key down to change direction */
 static void update_direction(void) {
     SnakeCell *head = snake->head;
 
@@ -182,6 +171,7 @@ static void update_direction(void) {
     }
 }
 
+/* Move the snake according to the current direction */
 static void update_snake(void) {
     SnakeCell *cell = snake->head;
 
@@ -216,7 +206,7 @@ static void update_snake(void) {
 
     board[cell->x][cell->y].type = SNAKE_HEAD; /* Update board of snake's location */
     cell = cell->next;
-    while (cell) {
+    while (cell) { /* Update the rest of the snake */
         x = cell->x;
         y = cell->y;
         if (cell->direction == RIGHT) {
@@ -242,6 +232,7 @@ static void update_snake(void) {
     board[x][y].type = EMPTY;
 }
 
+/* Update high score if necessary and change from game screen to game over screen */
 static void game_over(void) {
     if (snake->length > high_score) {
         high_score = snake->length;
@@ -249,8 +240,8 @@ static void game_over(void) {
     screen = GAMEOVER;
 }
 
+/* Draw apple in random cell not occupied by the snake */
 static void draw_apple(void) {
-    /* Get a random cell in board that is not occupied by the snake */
     int rand_x, rand_y;
     do {
         rand_x = rand() % COLS;
@@ -261,6 +252,7 @@ static void draw_apple(void) {
     apple_exists = 1;
 }
 
+/* Increase length of snake after it eats an apple */
 static void increase_snake(void) {
     SnakeCell *new_tail = malloc(sizeof(SnakeCell));
     new_tail->x = snake->tail->x;
@@ -290,16 +282,19 @@ static void increase_snake(void) {
     snake->length++;
 }
 
+/* Start screen for game. Draw title and instructions for how to start game */
 static void draw_start_screen(void) {
     DrawText("SNAKE", (WINDOW_WIDTH / 2) - 115, (WINDOW_HEIGHT / 2) - 150, 70, GREEN);
     DrawText("Press [Enter] to play", (WINDOW_WIDTH / 2) - 165, (WINDOW_HEIGHT / 2) - 50, 30, RAYWHITE);
 }
 
+/* Game over screen. Draw "GAME OVER" and instructions for how to restart game */
 static void draw_game_over_screen(void) {
     DrawText("GAME OVER", (WINDOW_WIDTH / 2) - 215, (WINDOW_HEIGHT / 2) - 150, 70, GREEN);
     DrawText("Press [Enter] to play", (WINDOW_WIDTH / 2) - 165, (WINDOW_HEIGHT / 2) - 50, 30, RAYWHITE);
 }
 
+/* Set all board cells to EMPTY and free old allocate memory from snake*/
 static void reset_game(void) {
     /* Clear all board cells */
     for (int x = 0; x < COLS; x++) {
